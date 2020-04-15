@@ -23,7 +23,7 @@ public class BlockShuffle extends JavaPlugin{
 	private Random random = new Random();
 	
 	private long previousShuffle = -1;
-	private final int SHUFFLE_TIME_MINUTES = 1;
+	private final int SHUFFLE_TIME_MINUTES = 5;
 	private int previousCountdown = -1;
 	
 	public HashMap<Player, PlayerState> playersInGame = new HashMap<Player, PlayerState>();
@@ -76,6 +76,16 @@ public class BlockShuffle extends JavaPlugin{
 			Material.LAVA,
 			Material.HAY_BLOCK,
 			Material.BELL,
+			Material.BLACK_WOOL,
+			Material.BLUE_WOOL,
+			Material.CYAN_WOOL,
+			Material.RED_WOOL,
+			Material.YELLOW_WOOL,
+			Material.GREEN_WOOL,
+			Material.LIME_WOOL,
+			Material.WHITE_WOOL,
+			Material.MAGENTA_WOOL,
+			Material.ORANGE_WOOL
 	}));
 	
 	
@@ -189,7 +199,7 @@ public class BlockShuffle extends JavaPlugin{
 					boolean found = true;
 					for(Player all : playersInGame.keySet()) {
 						if(!playersInGame.get(all).hasFound)
-							if(all.getLocation().add(0, -0.5, 0).getBlock().getType() == playersInGame.get(all).getMaterial()) {
+							if(all.getLocation().add(0, -0.75, 0).getBlock().getType() == playersInGame.get(all).getMaterial()) {
 								// When their block is found
 								playersInGame.get(all).setFound(true);
 								Bukkit.broadcastMessage("§6§l" + all.getName() + " has found their block!");
