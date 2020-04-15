@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -139,15 +140,15 @@ public class BlockShuffle extends JavaPlugin{
 						
 						for(Player p : failed) playersInGame.remove(p);
 						
-						if(playersInGame.size() == 1) {
+						if(playersInGame.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
 							blockShuffleEnabled = false;
 							for(Player p : playersInGame.keySet()) {
 								Bukkit.broadcastMessage("§a§l" + p.getName() + " won BlockShuffle!");
 								break;
 							}
 							return;
-						}else if(playersInGame.size() == 1) {
-							Bukkit.broadcastMessage("§4§lNobody managed to find their block.");
+						}else if(playersInGame.size() == 0) {
+							Bukkit.broadcastMessage("§4§lNobody managed to find their block. Game over!");
 							blockShuffleEnabled = false;
 						}
 						
@@ -203,6 +204,7 @@ public class BlockShuffle extends JavaPlugin{
 								// When their block is found
 								playersInGame.get(all).setFound(true);
 								Bukkit.broadcastMessage("§6§l" + all.getName() + " has found their block!");
+								all.playSound(all.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
 							}else
 								found = false;
 					}
