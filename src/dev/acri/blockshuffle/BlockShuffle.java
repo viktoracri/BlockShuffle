@@ -23,7 +23,8 @@ public class BlockShuffle extends JavaPlugin{
 	private Random random = new Random();
 	
 	private long previousShuffle = -1;
-	private final int SHUFFLE_TIME_MINUTES = 5;
+	private final int SHUFFLE_TIME_MINUTES = 1;
+	private int previousCountdown = -1;
 	
 	public HashMap<Player, PlayerState> playersInGame = new HashMap<Player, PlayerState>();
 	
@@ -70,7 +71,11 @@ public class BlockShuffle extends JavaPlugin{
 			Material.COBBLESTONE_SLAB,
 			Material.STONE_BRICK_SLAB,
 			Material.GLASS,
-			Material.PISTON
+			Material.PISTON,
+			Material.WATER,
+			Material.LAVA,
+			Material.HAY_BLOCK,
+			Material.BELL,
 	}));
 	
 	
@@ -80,7 +85,7 @@ public class BlockShuffle extends JavaPlugin{
 		this.getCommand("blockshuffle").setExecutor(new CommandBlockShuffle());
 		this.getCommand("blockshuffle").setTabCompleter(new CommandBlockShuffle());
 		for(Material mat : Material.values()) {
-			if(mat.name().startsWith("OAK"))
+			if(mat.name().startsWith("OAK") && mat.name().contains("BOAT"))
 				allowedMaterials.add(mat);
 			else if(mat.name().contains("DIORITE"))
 				allowedMaterials.add(mat);
@@ -109,19 +114,20 @@ public class BlockShuffle extends JavaPlugin{
 			public void run() {
 				if(blockShuffleEnabled) {
 					if(System.currentTimeMillis() - previousShuffle > SHUFFLE_TIME_MINUTES * 60000){
+						previousCountdown = -1;
 						// When a new round starts
 						previousShuffle = System.currentTimeMillis();
 						
-						Player failed = null;
+						List<Player> failed = new ArrayList<Player>();
 						for(Player all : playersInGame.keySet()) {
 							if(!playersInGame.get(all).hasFound) {
 								// If a player fails to find their block
-								Bukkit.broadcastMessage("§c§l" + all.getName() + " failed to find their block!");
-								failed = all;
+								Bukkit.broadcastMessage("§4§l" + all.getName() + " failed to find their block!");
+								failed.add(all);
 							}
 						}
 						
-						if(failed != null) playersInGame.remove(failed);
+						for(Player p : failed) playersInGame.remove(p);
 						
 						if(playersInGame.size() == 1) {
 							blockShuffleEnabled = false;
@@ -130,6 +136,9 @@ public class BlockShuffle extends JavaPlugin{
 								break;
 							}
 							return;
+						}else if(playersInGame.size() == 1) {
+							Bukkit.broadcastMessage("§4§lNobody managed to find their block.");
+							blockShuffleEnabled = false;
 						}
 						
 						
@@ -139,15 +148,48 @@ public class BlockShuffle extends JavaPlugin{
 							Material mat = generateNewMaterial();
 							playersInGame.get(all).setMaterial(mat);
 							playersInGame.get(all).setFound(false);
-							all.sendMessage("§aYou need to stand on " + mat.name().toLowerCase().replaceAll("_", " "));
+							
+							
+							
+							all.sendMessage("§aYou must find and stand on a §b" + mat.name().toLowerCase().replaceAll("_", " "));
 							
 						}
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 10000 && previousCountdown == -1) {
+						Bukkit.broadcastMessage("§c§lYou have 10 seconds to stand on your block");
+						previousCountdown = 10;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 9000 && previousCountdown == 10) {
+						Bukkit.broadcastMessage("§c§lYou have 9 seconds to stand on your block");
+						previousCountdown = 9;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 8000 && previousCountdown == 9) {
+						Bukkit.broadcastMessage("§c§lYou have 8 seconds to stand on your block");
+						previousCountdown = 8;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 7000 && previousCountdown == 8) {
+						Bukkit.broadcastMessage("§c§lYou have 7 seconds to stand on your block");
+						previousCountdown = 7;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 6000 && previousCountdown == 7) {
+						Bukkit.broadcastMessage("§c§lYou have 6 seconds to stand on your block");
+						previousCountdown = 6;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 5000 && previousCountdown == 6) {
+						Bukkit.broadcastMessage("§c§lYou have 5 seconds to stand on your block");
+						previousCountdown = 5;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 4000 && previousCountdown == 5) {
+						Bukkit.broadcastMessage("§c§lYou have 4 seconds to stand on your block");
+						previousCountdown = 4;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 3000 && previousCountdown == 4) {
+						Bukkit.broadcastMessage("§c§lYou have 3 seconds to stand on your block");
+						previousCountdown = 3;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 2000 && previousCountdown == 3) {
+						Bukkit.broadcastMessage("§c§lYou have 2 seconds to stand on your block");
+						previousCountdown = 2;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 1000 && previousCountdown == 2) {
+						Bukkit.broadcastMessage("§c§lYou have 1 seconds to stand on your block");
+						previousCountdown = 1;
 					}
 					
 					boolean found = true;
 					for(Player all : playersInGame.keySet()) {
 						if(!playersInGame.get(all).hasFound)
-							if(all.getLocation().add(0, -1, 0).getBlock().getType() == playersInGame.get(all).getMaterial()) {
+							if(all.getLocation().add(0, -0.5, 0).getBlock().getType() == playersInGame.get(all).getMaterial()) {
 								// When their block is found
 								playersInGame.get(all).setFound(true);
 								Bukkit.broadcastMessage("§6§l" + all.getName() + " has found their block!");
@@ -160,7 +202,7 @@ public class BlockShuffle extends JavaPlugin{
 					
 					
 				}
-			}}.runTaskTimer(this, 0, 10);
+			}}.runTaskTimer(this, 0, 5);
 	}
 	
 	public void startGame() {
