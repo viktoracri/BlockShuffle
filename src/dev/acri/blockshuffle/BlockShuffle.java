@@ -25,7 +25,19 @@ public class BlockShuffle extends JavaPlugin{
 	
 	private long previousShuffle = -1;
 	private final int SHUFFLE_TIME_MINUTES = 5;
-	private int previousCountdown = -1;
+	//private int previousCountdown = -1;
+	
+	private boolean countdownEnabled = false;
+	private BukkitRunnable countdown = new BukkitRunnable() {
+		int count = 10;
+		@Override
+		public void run() {
+			if(count < 1)this.cancel();
+			if(!countdownEnabled)this.cancel();
+			Bukkit.broadcastMessage("§c§lYou have " + count + " seconds to stand on your block");
+			count--;
+		};
+	};
 	
 	public HashMap<Player, PlayerState> playersInGame = new HashMap<Player, PlayerState>();
 	
@@ -125,7 +137,6 @@ public class BlockShuffle extends JavaPlugin{
 			public void run() {
 				if(blockShuffleEnabled) {
 					if(System.currentTimeMillis() - previousShuffle > SHUFFLE_TIME_MINUTES * 60000){
-						previousCountdown = -1;
 						// When a new round starts
 						previousShuffle = System.currentTimeMillis();
 						
@@ -164,37 +175,11 @@ public class BlockShuffle extends JavaPlugin{
 							
 							all.sendMessage("§aYou must find and stand on a §b" + mat.name().toLowerCase().replaceAll("_", " "));
 							
+					
 						}
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 10000 && previousCountdown == -1) {
-						Bukkit.broadcastMessage("§c§lYou have 10 seconds to stand on your block");
-						previousCountdown = 10;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 9000 && previousCountdown == 10) {
-						Bukkit.broadcastMessage("§c§lYou have 9 seconds to stand on your block");
-						previousCountdown = 9;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 8000 && previousCountdown == 9) {
-						Bukkit.broadcastMessage("§c§lYou have 8 seconds to stand on your block");
-						previousCountdown = 8;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 7000 && previousCountdown == 8) {
-						Bukkit.broadcastMessage("§c§lYou have 7 seconds to stand on your block");
-						previousCountdown = 7;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 6000 && previousCountdown == 7) {
-						Bukkit.broadcastMessage("§c§lYou have 6 seconds to stand on your block");
-						previousCountdown = 6;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 5000 && previousCountdown == 6) {
-						Bukkit.broadcastMessage("§c§lYou have 5 seconds to stand on your block");
-						previousCountdown = 5;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 4000 && previousCountdown == 5) {
-						Bukkit.broadcastMessage("§c§lYou have 4 seconds to stand on your block");
-						previousCountdown = 4;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 3000 && previousCountdown == 4) {
-						Bukkit.broadcastMessage("§c§lYou have 3 seconds to stand on your block");
-						previousCountdown = 3;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 2000 && previousCountdown == 3) {
-						Bukkit.broadcastMessage("§c§lYou have 2 seconds to stand on your block");
-						previousCountdown = 2;
-					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 1000 && previousCountdown == 2) {
-						Bukkit.broadcastMessage("§c§lYou have 1 seconds to stand on your block");
-						previousCountdown = 1;
+					}else if(System.currentTimeMillis() - previousShuffle > (SHUFFLE_TIME_MINUTES * 60000) - 10000 && !countdownEnabled) {
+						startCountdown();
+						countdownEnabled = true;
 					}
 					
 					boolean found = true;
@@ -209,7 +194,10 @@ public class BlockShuffle extends JavaPlugin{
 								found = false;
 					}
 					
-					if(found) previousShuffle = -1;
+					if(found) {
+						previousShuffle = -1;
+						countdownEnabled = false;
+					}
 					
 					
 					
@@ -223,6 +211,12 @@ public class BlockShuffle extends JavaPlugin{
 			playersInGame.put(all, new PlayerState());
 		blockShuffleEnabled = true;
 		previousShuffle = -1;
+	}
+	
+	public void startCountdown() {
+		
+		countdown.runTaskTimer(this, 0, 20);
+		
 	}
 	
 	public Material generateNewMaterial() {
